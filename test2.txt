@@ -1,0 +1,34 @@
+integer i, max, sum, product, counter;
+sum = 0;
+product = 1;
+counter = 1;
+get(max);
+while (counter <= max) {
+    sum = sum + counter;
+    product = product * counter;
+    counter = counter + 1;
+}
+put(sum);
+put(product);
+
+integer x, y, result;
+get(x);
+get(y);
+if (x > y) {
+    result = x;
+} fi
+put(result);
+
+integer m, n, diff;
+get(m);
+get(n);
+if (m < n) {
+} fi
+put(diff);
+
+integer f, g, h, prod;
+get(f);
+get(g);
+get(h);
+prod = f * g * h;
+put(prod);

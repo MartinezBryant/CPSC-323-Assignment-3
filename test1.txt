@@ -1,0 +1,17 @@
+integer i, max, sum;
+sum = 0;
+i = 1;
+get(max);
+while (i < max) {
+    sum = sum + i;
+    i = i + 1;
+}
+put(sum + max);
+
+integer a, b, result;
+get(a);
+get(b);
+if (a > b) {
+    result = a;
+} fi
+put(result);

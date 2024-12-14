@@ -1,60 +1,63 @@
+from lexer import Lexer
 from parser import Parser
 
-# Test case function for assignment statement
-def test_assignment():
-    parser = Parser()
-    parser.token = "id"  # Initial token
-    tokens = ["id", "=", "id", "+", "id"]
 
-    def custom_lexer():
-        if tokens:
-            parser.token = tokens.pop(0)
-        else:
-            parser.token = None
+def process_file(file_path, output_file):
+    """Process the source code file and write the output to an output file."""
+    with open(output_file, 'w') as out_file:
+        out_file.write(f"Processing file: {file_path}\n")
+        
+        # Read the source code
+        with open(file_path, 'r') as file:
+            source_code = file.read()
+            out_file.write(f"Test Case Content:\n{source_code}\n")
+        
+        # Tokenize the source code
+        lexer = Lexer(source_code)
+        lexer.tokenize()
 
-    parser.lexer = custom_lexer
-    parser.A()
-    parser.print_instr_table()
+        # Initialize the parser with the lexer
+        parser = Parser(lexer)
+        parser.lexer_next()  # Initialize the first token
 
-# Test case function for while statement
-def test_while():
-    parser = Parser()
-    parser.token = "while"  # Initial token
-    tokens = ["while", "(", "id", "<", "id", ")", "id", "=", "id", "+", "id"]
+        # Parse the source code
+        while parser.token:
+            if parser.token == "keyword" and parser.lexeme == "integer":
+                # Handle declarations
+                parser.lexer_next()  # Consume 'integer'
+                while parser.token != "separator" or parser.lexeme != ";":
+                    if parser.token == "identifier":
+                        parser.insert_symbol(parser.lexeme, "integer")
+                    parser.lexer_next()
+                parser.lexer_next()  # Consume ';'
+            elif parser.token in {"identifier", "keyword"}:
+                if parser.lexeme == "while":
+                    parser.while_statement()
+                elif parser.lexeme == "if":
+                    parser.if_statement()
+                elif parser.lexeme in {"get", "put"}:
+                    parser.S()
+                else:
+                    parser.A()  # Assume an assignment
+            else:
+                parser.error_message("Unexpected token")
 
-    def custom_lexer():
-        if tokens:
-            parser.token = tokens.pop(0)
-        else:
-            parser.token = None
+        # Output the results to the file
+        out_file.write("\nGenerated Assembly Code (Instruction Table):\n")
+        for instr in parser.instr_table:
+            out_file.write(f"{instr['address']}\t{instr['op']}\t{instr['oprnd']}\n")
+        
+        out_file.write("\nGenerated Symbol Table:\n")
+        for lexeme, details in parser.symbol_table.items():
+            out_file.write(f"{lexeme}\t{details['address']}\t{details['type']}\n")
 
-    parser.lexer = custom_lexer
-    parser.while_statement()
-    parser.print_instr_table()
 
-# Test case function for if statement
-def test_if():
-    parser = Parser()
-    parser.token = "if"  # Initial token
-    tokens = ["if", "(", "id", ">", "id", ")", "id", "=", "id", "*", "id", "fi"]
-
-    def custom_lexer():
-        if tokens:
-            parser.token = tokens.pop(0)
-        else:
-            parser.token = None
-
-    parser.lexer = custom_lexer
-    parser.if_statement()
-    parser.print_instr_table()
-
-# Run test cases
 if __name__ == "__main__":
-    print("Test Case 1: Assignment")
-    test_assignment()
+    # Test files to process
+    files = ["test1.txt", "test2.txt", "test3.txt"]
 
-    print("\nTest Case 2: While Loop")
-    test_while()
-
-    print("\nTest Case 3: If Statement")
-    test_if()
+    for i, file in enumerate(files, start=1):
+        output_file = f"output_test{i}.txt"  # Output file for each test case
+        process_file(file, output_file)
+        print(f"Results for {file} written to {output_file}")
+        print("\n" + "=" * 50 + "\n")
